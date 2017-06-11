@@ -8,11 +8,7 @@ export getgraph, version, createnode, getnode, deletenode, setnodeproperty, getn
        addnodelabel, addnodelabels, updatenodelabels, deletenodelabel, getnodelabels,
        getnodesforlabel, getlabels, getrel, getrels, getneighbors, createrel, deleterel, getrelproperty,
        getrelproperties, updaterelproperties
-export Connection, Result
-
-const DEFAULT_HOST = "localhost"
-const DEFAULT_PORT = 7474
-const DEFAULT_URI = "/db/data/"
+export Result
 
 typealias JSONObject{T <: AbstractString} Union{Dict{T,Any},Void}  # UTF8String
 typealias JSONArray Union{Vector,Void}
@@ -24,39 +20,7 @@ typealias QueryData Union{Dict{Any,Any},Void}
 # Connection
 # ----------
 
-immutable Connection
-  tls::Bool
-  host::AbstractString #UTF8String
-  port::Int
-  path::AbstractString #UTF8String
-  url::AbstractString #UTF8String
-  user::AbstractString #UTF8String
-  password::AbstractString #UTF8String
-
-  Connection{T <: AbstractString}(host::T; port=DEFAULT_PORT, path=DEFAULT_URI, tls=false, user="", password="") = new(tls, string(host), port, string(path), string("http://$host:$port$path"), string(user), string(password))
-  Connection() = new(DEFAULT_HOST)
-end
-
-function connurl(c::Connection)
-  proto = ifelse(c.tls, "https", "http")
-  "$(proto)://$(c.host):$(c.port)$(c.path)"
-end
-
-function connurl{T <: AbstractString}(c::Connection, suffix::T)
-  url = connurl(c)
-  "$(url)$(suffix)"
-end
-
-function connheaders(c::Connection)
-  headers = Dict(
-    "Accept" => "application/json; charset=UTF-8",
-    "Host" => "$(c.host):$(c.port)")
-  if c.user != "" && c.password != ""
-    payload = "$(c.user):$(c.password)" |> base64encode
-    headers["Authorization"] = "Basic $(payload)"
-  end
-  headers
-end
+include("connection.jl")
 
 # -----
 # Graph
